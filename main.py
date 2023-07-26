@@ -6,7 +6,7 @@ def format_ingredients(items):
         return ""
 
     # Якщо є лише один інгредієнт, повертаємо його без змін
-    if num_ingredients == 1:
+    elif num_ingredients == 1:
         return items[0]
 
     # Якщо інгредієнтів більше одного, форматуємо список
