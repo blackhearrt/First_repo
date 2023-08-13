@@ -1,23 +1,87 @@
-def format_ingredients(items):
-    num_ingredients = len(items)
+import shutil
+import sys
+import scan
+import normalize
+from pathlib import Path
+from files_generator import file_generator
 
-    # Перевіряємо, чи список не порожній
-    if num_ingredients == 0:
-        return ""
 
-    # Якщо є лише один інгредієнт, повертаємо його без змін
-    elif num_ingredients == 1:
-        return items[0]
 
-    # Якщо інгредієнтів більше одного, форматуємо список
-    formatted_ingredients = ", ".join(items[:-1])  # Об'єднуємо всі елементи, крім останнього
+def hande_file(path, root_folder, dist):
+    target_folder = root_folder / dist
+    target_folder.mkdir(exist_ok=True)
+    path.replace(target_folder/normalize.normalize(path.name))
 
-    # Додаємо "and" перед останнім елементом
-    formatted_ingredients += " and " + items[-1]
 
-    return formatted_ingredients
-    
+def handle_archive(path, root_folder, dist):
+    target_folder = root_folder / dist
+    target_folder.mkdir(exist_ok=True)
 
-# Приклад використання:
-print(format_ingredients(["2 eggs", "1 liter sugar", "1 tsp salt", "vinegar"]))
+    new_name = normalize.normalize(path.name.replace(".zip", ''))
 
+    archive_folder = root_folder / new_name
+    archive_folder.mkdir(exist_ok=True)
+
+    try:
+        shutil.unpack_archive(str(path.resolve()), str(path.resolve()))
+    except shutil.ReadError:
+        archive_folder.rmdir()
+        return
+    except FileNotFoundError:
+        archive_folder.rmdir()
+        return
+    path.unlink()
+
+
+def remove_empty_folders(path):
+    for item in path.iterdir():
+        if item.is_dir():
+            remove_empty_folders(item)
+            try:
+                item.rmdir()
+            except OSError:
+                pass
+
+
+def get_folder_objects(root_path):
+    for folder in root_path.iterdir():
+        if folder.is_dir():
+            remove_empty_folders(folder)
+            try:
+                folder.rmdir()
+            except OSError:
+                pass
+
+def main(folder_path):
+    scan.scan(folder_path)
+
+    for file in scan.jpeg_files:
+        hande_file(file, folder_path, "JPEG")
+
+    for file in scan.jpg_files:
+        hande_file(file, folder_path, "JPG")
+
+    for file in scan.png_files:
+        hande_file(file, folder_path, "PNG")
+
+    for file in scan.txt_files:
+        hande_file(file, folder_path, "TXT")
+
+    for file in scan.docx_files:
+        hande_file(file, folder_path, "DOCX")
+
+    for file in scan.others:
+        hande_file(file, folder_path, "OTHERS")
+
+    for file in scan.archives:
+        handle_archive(file, folder_path, "ARCHIVE")
+
+    get_folder_objects(folder_path)
+
+if __name__ == '__main__':
+    path = sys.argv[1]
+    print(f"Start in {path}")
+
+    arg = Path(path)
+    file_generator(arg)
+    main(arg.resolve())
