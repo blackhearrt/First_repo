@@ -2,11 +2,10 @@ import sys
 from pathlib import Path
 
 
-jpeg_files = list()
-png_files = list()
-jpg_files = list()
-txt_files = list()
-docx_files = list()
+images = list()
+documents = list()
+audio = list()
+video = list()
 folders = list()
 archives = list()
 others = list()
@@ -14,12 +13,16 @@ unknown = set()
 extensions = set()
 
 registered_extensions = {
-    "JPEG": jpeg_files,
-    "PNG": png_files,
-    "JPG": jpg_files,
-    "TXT": txt_files,
-    "DOCX": docx_files,
-    "ZIP": archives
+    "JPEG": images,
+    "PNG": images,
+    "JPG": images,
+    "DOC": documents,
+    "PDF": documents,
+    "TXT": documents,
+    "DOCX": documents,
+    "ZIP": archives,
+    "MP3": audio,
+    "MP4": video
 }
 
 
@@ -30,7 +33,7 @@ def get_extensions(file_name):
 def scan(folder):
     for item in folder.iterdir():
         if item.is_dir():
-            if item.name not in ("JPEG", "JPG", "PNG", "TXT", "DOCX", "OTHER", "ARCHIVE"):
+            if item.name not in ("JPEG", "JPG", "PNG", "TXT", "DOCX", "DOC", "PDF", "OTHER", "ZIP", "MP3", "MP4"):
                 folders.append(item)
                 scan(item)
             continue
@@ -51,17 +54,16 @@ def scan(folder):
 
 if __name__ == '__main__':
     path = sys.argv[1]
-    print(f"Start in {path}")
+    print(f"Start in {path}\n")
 
     arg = Path(path)
     scan(arg)
 
-    print(f"jpeg: {jpeg_files}\n")
-    print(f"jpg: {jpg_files}\n")
-    print(f"png: {png_files}\n")
-    print(f"txt: {txt_files}\n")
-    print(f"docx: {docx_files}\n")
-    print(f"archive: {archives}\n")
-    print(f"unknown: {others}\n")
+    print(f"Images: {images}\n")
+    print(f"Video: {video}\n")
+    print(f"Audio: {audio}\n")
+    print(f"Documents: {documents}\n")
+    print(f"Archive: {archives}\n")
+    print(f"Unknown: {others}\n")
     print(f"All extensions: {extensions}\n")
     print(f"Unknown extensions: {unknown}\n")

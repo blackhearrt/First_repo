@@ -3,11 +3,10 @@ import sys
 import scan
 import normalize
 from pathlib import Path
-from files_generator import file_generator
 
 
 
-def hande_file(path, root_folder, dist):
+def handle_file(path, root_folder, dist):
     target_folder = root_folder / dist
     target_folder.mkdir(exist_ok=True)
     path.replace(target_folder/normalize.normalize(path.name))
@@ -55,23 +54,20 @@ def get_folder_objects(root_path):
 def main(folder_path):
     scan.scan(folder_path)
 
-    for file in scan.jpeg_files:
-        hande_file(file, folder_path, "JPEG")
+    for file in scan.images:
+        handle_file(file, folder_path, "IMAGES")
 
-    for file in scan.jpg_files:
-        hande_file(file, folder_path, "JPG")
+    for file in scan.audio:
+        handle_file(file, folder_path, "AUDIO")
 
-    for file in scan.png_files:
-        hande_file(file, folder_path, "PNG")
+    for file in scan.video:
+        handle_file(file, folder_path, "VIDEO")
 
-    for file in scan.txt_files:
-        hande_file(file, folder_path, "TXT")
-
-    for file in scan.docx_files:
-        hande_file(file, folder_path, "DOCX")
+    for file in scan.documents:
+        handle_file(file, folder_path, "DOCUMENTS")
 
     for file in scan.others:
-        hande_file(file, folder_path, "OTHERS")
+        handle_file(file, folder_path, "OTHERS")
 
     for file in scan.archives:
         handle_archive(file, folder_path, "ARCHIVE")
@@ -83,5 +79,4 @@ if __name__ == '__main__':
     print(f"Start in {path}")
 
     arg = Path(path)
-    file_generator(arg)
     main(arg.resolve())
