@@ -12,21 +12,21 @@ def handle_file(path, root_folder, dist):
     path.replace(target_folder/normalize.normalize(path.name))
 
 
-def handle_archive(path, root_folder, dist):
+def handle_archive(path: Path, root_folder, dist):
     target_folder = root_folder / dist
     target_folder.mkdir(exist_ok=True)
 
     new_name = normalize.normalize(path.name.replace(".zip", ''))
 
-    archive_folder = root_folder / new_name
+    archive_folder = target_folder / new_name
     archive_folder.mkdir(exist_ok=True)
-
+    path.rename(archive_folder / path.name)
+    
     try:
-        shutil.unpack_archive(str(path.resolve()), str(path.resolve()))
+        shutil.unpack_archive(str(path.resolve()), archive_folder)
     except shutil.ReadError:
-        archive_folder.rmdir()
         return
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         archive_folder.rmdir()
         return
     path.unlink()
